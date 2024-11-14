@@ -167,4 +167,21 @@ public class CampusService {
         }
         return Response.status(200).entity(foundUser).build();
     }
+    @GET
+    @ApiOperation(value = "Get users by interest point", notes = "Returns a list of all users who passed through a specific point of interest")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful", response = List.class),
+            @ApiResponse(code = 404, message = "No users found for the specified point of interest"),
+            @ApiResponse(code = 500, message = "Server Error")
+    })
+    @Path("/points/{x}/{y}/users")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUsersByInterestPoint(@PathParam("x") int x, @PathParam("y") int y) {
+        List<Usuario> usuarios = this.cm.consultarUsuariosPorPunto(x, y);
+        if (usuarios.isEmpty()) {
+            return Response.status(404).entity("No users found for the specified point of interest").build();
+        }
+        GenericEntity<List<Usuario>> entity = new GenericEntity<List<Usuario>>(usuarios) {};
+        return Response.status(200).entity(entity).build();
+    }
 }
