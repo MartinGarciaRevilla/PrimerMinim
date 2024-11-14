@@ -67,23 +67,17 @@ public class CampusService {
         return Response.status(200).entity(entity).build();
     }
 
+
     @POST
     @ApiOperation(value = "Add a new user", notes = "Adds a new user to the system")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "User successfully added"),
             @ApiResponse(code = 500, message = "Server Error")
     })
-    @Path("/users/add/{id}/{nombre}/{apellidos}/{email}/{year}/{month}/{day}")
-    public Response addUser(
-            @PathParam("id") String id,
-            @PathParam("nombre") String nombre,
-            @PathParam("apellidos") String apellidos,
-            @PathParam("email") String email,
-            @PathParam("year") int year,
-            @PathParam("month") int month,
-            @PathParam("day") int day) {
-        LocalDate birthDate = LocalDate.of(year, month, day);
-        this.cm.addUsuario(id, nombre, apellidos, email, birthDate);
+    @Path("/users/add")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addUser(Usuario usuario) {
+        this.cm.addUsuario(usuario.getId(), usuario.getNombre(), usuario.getApellidos(), usuario.getEmail(), usuario.getFechaNacimiento());
         return Response.status(200).build();
     }
 
@@ -156,5 +150,21 @@ public class CampusService {
         }
         GenericEntity<List<PuntoInteres>> entity = new GenericEntity<List<PuntoInteres>>(visitedPoints) {};
         return Response.status(200).entity(entity).build();
+    }
+    @GET
+    @ApiOperation(value = "Get a specific user", notes = "Returns details of a specific user by ID")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful", response = Usuario.class),
+            @ApiResponse(code = 404, message = "User not found"),
+            @ApiResponse(code = 500, message = "Server Error")
+    })
+    @Path("/users/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUser(@PathParam("id") String id) {
+        Usuario foundUser = this.cm.consultarUsuario(id);
+        if (foundUser == null) {
+            return Response.status(404).entity("User not found").build();
+        }
+        return Response.status(200).entity(foundUser).build();
     }
 }
